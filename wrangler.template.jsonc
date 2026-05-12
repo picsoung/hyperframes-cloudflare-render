@@ -1,0 +1,78 @@
+// Template — DO NOT deploy this file directly.
+//
+// scripts/ensure-wrangler-config.mjs renders this into a generated
+// wrangler.jsonc (gitignored), substituting <<PROJECT_ID>> placeholders with
+// values derived from the parent HyperFrames project (see scripts/lib/project.mjs).
+//
+// Setup, build, deploy, and render scripts all call ensure-wrangler-config.mjs
+// before invoking wrangler, so the generated file stays in sync with
+// .cloudrender.json automatically. Re-run `npm run setup` after the parent
+// project's name changes.
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "hyperframes-<<PROJECT_ID>>",
+	"main": "src/index.ts",
+	"workers_dev": true,
+	"compatibility_date": "2026-04-01",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1,
+		"logs": {
+			"enabled": true,
+			"head_sampling_rate": 1,
+			"persist": true,
+			"invocation_logs": true
+		},
+		"traces": {
+			"enabled": true,
+			"persist": true,
+			"head_sampling_rate": 1
+		}
+	},
+	// Build runs at deploy/dev time. sync-composition.mjs reads R2_ASSETS_BASE
+	// from cloudflare-render/.env (gitignored) — run `npm run setup` to
+	// bootstrap it. The composition dir name comes from .cloudrender.json.
+	"build": {
+		"command": "node scripts/ensure-wrangler-config.mjs && node scripts/sync-composition.mjs && node scripts/build.mjs"
+	},
+	"vars": {
+		"ENABLE_AI_GEN": "false"
+	},
+	"assets": {
+		"directory": "./public",
+		"binding": "ASSETS"
+	},
+	"containers": [
+		{
+			"class_name": "RenderContainer",
+			"image": "./Dockerfile",
+			"max_instances": 5,
+			"instance_type": "standard-4"
+		}
+	],
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "RENDER_CONTAINER",
+				"class_name": "RenderContainer"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_sqlite_classes": [
+				"RenderContainer"
+			]
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "RENDERS",
+			"bucket_name": "hyperframes-<<PROJECT_ID>>-renders"
+		}
+	]
+}

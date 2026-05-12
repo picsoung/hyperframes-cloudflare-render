@@ -1,0 +1,6 @@
+{
+  "name": "hello-cloudrender",
+  "private": true,
+  "type": "module",
+  "description": "Minimal HyperFrames project used by cloudflare-render's test:local."
+}

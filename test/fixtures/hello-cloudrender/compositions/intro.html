@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>intro</title>
+    <meta name="hf-duration" content="2" />
+    <meta name="hf-fps" content="30" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #111;
+        color: #fff;
+        font-family: system-ui, sans-serif;
+        display: grid;
+        place-items: center;
+      }
+      .pulse {
+        font-size: 72px;
+        font-weight: 700;
+        animation: pulse 2s ease-in-out;
+      }
+      @keyframes pulse {
+        0% { transform: scale(0.8); opacity: 0; }
+        50% { transform: scale(1.05); opacity: 1; }
+        100% { transform: scale(1); opacity: 0; }
+      }
+      /* References that sync-composition should rewrite to R2 URLs. */
+      .bg {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+      }
+    </style>
+  </head>
+  <body>
+    <video class="bg" src="../assets/videos/clip.mp4" muted></video>
+    <audio src="../assets/audio/beep.mp3"></audio>
+    <div class="pulse">intro</div>
+  </body>
+</html>

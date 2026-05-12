@@ -1,0 +1,9 @@
+{
+  "name": "hyperframes-render-container",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "hyperframes": "^0.4.14"
+  }
+}

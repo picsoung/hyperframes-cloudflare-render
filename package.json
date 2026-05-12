@@ -1,0 +1,54 @@
+{
+  "name": "hyperframes-cloudflare-render",
+  "description": "Drop-in cloud renderer for HyperFrames projects — preview in the browser, render MP4s server-side on Cloudflare Workers + Containers + R2.",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "cloudflare": {
+    "label": "HyperFrames Video Rendering",
+    "products": [
+      "Workers",
+      "Containers",
+      "R2"
+    ],
+    "categories": [],
+    "docs_url": "https://github.com/heygen-com/hyperframes",
+    "preview_image_url": "",
+    "icon_urls": [],
+    "bindings": {
+      "RENDER_CONTAINER": {
+        "description": "Container Durable Object hosting Chromium + ffmpeg + hyperframes; receives composition files and returns MP4 bytes."
+      },
+      "RENDERS": {
+        "description": "R2 bucket where rendered MP4s are stored. Created automatically on first deploy."
+      },
+      "ASSETS": {
+        "description": "Static asset binding for the preview UI and the bundled composition HTML."
+      }
+    }
+  },
+  "scripts": {
+    "setup": "node scripts/setup-r2.mjs",
+    "dev": "node scripts/ensure-wrangler-config.mjs && wrangler dev",
+    "predeploy": "node scripts/ensure-wrangler-config.mjs",
+    "deploy": "wrangler deploy",
+    "render:cloud": "node scripts/render-cloud.mjs",
+    "test:local": "node scripts/test-local.mjs",
+    "typecheck": "tsc --noEmit",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@cloudflare/containers": "^0.0.20",
+    "@hyperframes/core": "^0.5.3",
+    "@hyperframes/player": "^0.5.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260301.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.2",
+    "wrangler": "^4.90.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
