@@ -38,9 +38,6 @@
 	"build": {
 		"command": "node scripts/ensure-wrangler-config.mjs && node scripts/sync-composition.mjs && node scripts/build.mjs"
 	},
-	"vars": {
-		"ENABLE_AI_GEN": "false"
-	},
 	"assets": {
 		"directory": "./public",
 		"binding": "ASSETS"

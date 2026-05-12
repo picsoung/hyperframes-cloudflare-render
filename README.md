@@ -41,7 +41,6 @@ See [SETUP.md](./SETUP.md) for the long version + every workaround we've collect
 - **Auto-detects your parent project**: reads `../package.json` to derive worker name, R2 bucket name, and the composition directory. No source-file edits.
 - **Preview** your composition in the browser using `<hyperframes-player>` from `@hyperframes/player`.
 - **Render** the composition to an MP4 by POSTing to `/api/render`. The Worker streams the composition to a Cloudflare Container running a pre-built image with Chromium + FFmpeg + HyperFrames, streams the rendered MP4 directly into R2, and returns a URL.
-- **Generate from a prompt (BYOK)** — paste an OpenRouter API key and a text prompt; the Worker calls OpenRouter (Gemini 3 Flash by default) to synthesize a HyperFrames composition, lints it with `@hyperframes/core/lint`, self-heals up to 2× if needed, and previews the result in the player. Click "Render MP4" to capture it. Off by default — see [AI generation](#ai-generation-byok).
 
 ## Architecture
 
@@ -132,46 +131,6 @@ cloudflare-render/
 ```
 
 Everything project-specific (worker name, bucket names, composition dir) flows from one place: `.cloudrender.json`, derived from `../package.json` `.name` on first `npm run setup`. To re-target a different parent project, delete `.cloudrender.json` and re-run setup.
-
-## AI generation (BYOK)
-
-The "Generate from a prompt" panel lets a viewer paste their own OpenRouter API key, type a description, and synthesize a HyperFrames composition end-to-end. The composition previews in the player; the Render button then captures it to MP4 just like the bundled one.
-
-### Enabling it
-
-Off by default — `wrangler.template.jsonc` sets `ENABLE_AI_GEN: "false"` in `vars`. Flip to `"true"` to turn the BYOK panel on. The generated `wrangler.jsonc` is regenerated from the template on every `npm run setup`, so edit the template (not the generated file).
-
-### How the API key is handled
-
-- The user pastes their key into the panel; it's sent in the body of `POST /api/generate`.
-- The Worker forwards the key once to `https://openrouter.ai/api/v1/chat/completions` as `Authorization: Bearer <key>`.
-- The Worker does not log, cache, or persist the key. It exists only for the duration of one request.
-- Client-side, the key is mirrored to the tab's `sessionStorage` so generate→edit→regenerate doesn't require pasting it every time. Closing the tab clears it.
-
-### Pipeline
-
-```
-prompt + key
-   │
-   ▼
-POST /api/generate                      (Worker)
-   │
-   ├─▶ build skill prompt (src/lib/hyperframes-skill.ts)
-   ├─▶ fetch openrouter.ai (Gemini 3 Flash by default)
-   ├─▶ lintHyperframeHtml(html)         (@hyperframes/core/lint)
-   ├─▶ if lint fails, retry up to 2× with feedback
-   └─▶ return { html, model, attempts, lintOk, lintErrors }
-
-frontend
-   │
-   └─▶ player.setAttribute("srcdoc", html)   (no Blob URL needed)
-
-POST /api/render { html }              (existing endpoint, now accepts inline HTML)
-   │
-   └─▶ container → MP4 → R2 → /r/<key>
-```
-
-The default model is `google/gemini-3-flash-preview` — cheapest and fastest direct generation per ~80 eval runs in [llm-stories-hyperframes](https://github.com/jrusso1020/llm-stories-hyperframes), which the prompt is adapted from. You can pass a different `model` field in the request body to swap in any [OpenRouter model](https://openrouter.ai/models).
 
 ## Pricing
 
